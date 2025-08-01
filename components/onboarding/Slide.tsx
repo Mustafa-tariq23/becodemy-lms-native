@@ -19,7 +19,8 @@ import {
 } from "@/themes/app.constant";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-// import AuthModal from "../auth/auth.modal";
+
+import AuthModal from "../auth/authModal";
 
 export default function Slide({
   slide,
@@ -149,8 +150,8 @@ export default function Slide({
           setModalVisible(!modalVisible);
         }}
       >
-        <Pressable style={{ flex: 1 }} onPress={() => setModalVisible(false)}>
-          {/* <AuthModal setModalVisible={setModalVisible} /> */}
+        <Pressable className="flex-1" onPress={() => setModalVisible(false)}>
+          <AuthModal />
         </Pressable>
       </Modal>
     </>

@@ -1,314 +1,273 @@
-import { View, Text, Pressable, Image, Platform, Alert } from 'react-native'
-import React from 'react'
-import { BlurView } from 'expo-blur'
-import { fontSizes, windowHeight, windowWidth } from '@/themes/app.constant'
-import * as AuthSession from 'expo-auth-session'
-import * as WebBrowser from 'expo-web-browser'
-import { router } from 'expo-router'
+import { View, Text, Pressable, Image, Platform } from "react-native";
+import React, { useEffect } from "react";
+import { BlurView } from "expo-blur";
+import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
+import JWT from "expo-jwt";
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 
-WebBrowser.maybeCompleteAuthSession()
+export default function AuthModal({
+  setModalVisible,
+}: {
+  setModalVisible: (modal: boolean) => void;
+}) {
+  // const configureGoogleSignIn = () => {
+  //   if (Platform.OS === "ios") {
+  //     GoogleSignin.configure({
+  //       iosClientId: process.env.EXPO_PUBLIC_IOS_GOOGLE_API_KEY,
+  //     });
+  //   } else {
+  //     GoogleSignin.configure({
+  //       webClientId:
+  //         "500604689956-74tau857bhoviihkt0jsqitldq4tsjlf.apps.googleusercontent.com",
+  //     });
+  //   }
+  // };
 
-const authModal = () => {
+  // useEffect(() => {
+  //   configureGoogleSignIn();
+  // }, []);
 
-  const guestSignIn = () => {
-    // Navigate to home page as guest user
-    router.replace('/(tabs)')
-  }
+  // github auth start
+  const githubAuthEndpoints = {
+    authorizationEndpoint: "https://github.com/login/oauth/authorize",
+    tokenEndpoint: "https://github.com/login/oauth/access_token",
+    revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}`,
+  };
 
-  const googleSignIn = async () => {
-    try {
-      console.log('Google Sign-In pressed')
-      
-      // Google OAuth 2.0 endpoints
-      const discovery = {
-        authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-        tokenEndpoint: 'https://www.googleapis.com/oauth2/v4/token',
-        revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
-      }
+  const [request, response] = useAuthRequest(
+    {
+      clientId: process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID!,
+      clientSecret: process.env.EXPO_PUBLIC_GITHUB_CLIENT_SECRET!,
+      scopes: ["identity"],
+      redirectUri: makeRedirectUri({
+        scheme: "becodemy",
+      }),
+    },
+    githubAuthEndpoints
+  );
 
-      // Get the appropriate client ID for the platform
-      const clientId = Platform.OS === 'ios' 
-        ? process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
-        : process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { code } = response.params;
+      fetchAccessToken(code);
+    }
+  }, []);
 
-      if (!clientId) { 
-        Alert.alert('Configuration Error', 'Google OAuth client ID not found. Please check your environment variables.')
-        return
-      }
+  const handleGithubLogin = async () => {
+    const result = await WebBrowser.openAuthSessionAsync(
+      request?.url!,
+      makeRedirectUri({
+        scheme: "becodemy",
+      })
+    );
 
-            // Create the authentication request
-      const request = new AuthSession.AuthRequest({
-        clientId: clientId,
-        scopes: ['openid', 'profile', 'email'],
-        redirectUri: AuthSession.makeRedirectUri({
-          scheme: 'lms'
-        }),
-        responseType: AuthSession.ResponseType.Code,
-        extraParams: {
-          access_type: 'offline',
+    if (result.type === "success" && result.url) {
+      const urlParams = new URLSearchParams(result.url.split("?")[1]);
+      const code: any = urlParams.get("code");
+      fetchAccessToken(code);
+    }
+  };
+
+  const fetchAccessToken = async (code: string) => {
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-      })
-
-      console.log('Google OAuth - Using redirect URI:', request.redirectUri)
-      console.log('Google OAuth - Using client ID:', clientId)
-
-      // Prompt for authentication
-      const result = await request.promptAsync(discovery)
-
-      if (result.type === 'success') {
-        console.log('Google OAuth Success:', result)
-        
-        // Exchange the authorization code for tokens
-        const tokenResult = await AuthSession.exchangeCodeAsync(
-          {
-            clientId: clientId,
-            code: result.params.code,
-            extraParams: request.codeVerifier ? {
-              code_verifier: request.codeVerifier,
-            } : {},
-            redirectUri: AuthSession.makeRedirectUri({
-              scheme: 'lms'
-            }),
-          },
-          discovery
-        )
-
-        console.log('Token exchange result:', tokenResult)
-
-        // Get user info
-        if (tokenResult.accessToken) {
-          const userInfoResponse = await fetch(
-            `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenResult.accessToken}`
-          )
-          const userInfo = await userInfoResponse.json()
-          console.log('User info:', userInfo)
-          
-          Alert.alert(
-            'Sign-in Successful!', 
-            `Welcome ${userInfo.name || userInfo.email}!`,
-            [
-              {
-                text: 'Continue',
-                onPress: () => router.replace('/(tabs)')
-              }
-            ]
-          )
-          
-          // Here you would typically:
-          // 1. Send the tokens to your backend
-          // 2. Store user session
-          // 3. Navigate to the main app
-        }
-      } else if (result.type === 'cancel') {
-        console.log('User cancelled the sign-in')
-      } else {
-        console.log('Sign-in error:', result)
-        Alert.alert('Sign-in Error', 'Something went wrong. Please try again.')
+        body: `client_id=${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}&client_secret=${process.env.EXPO_PUBLIC_GITHUB_CLIENT_SECRET}&code=${code}`,
       }
-      
-    } catch (error) {
-      console.error('Google Sign-In error:', error)
-      Alert.alert('Sign-in Error', 'Unable to sign in. Please try again.')
+    );
+    const tokenData = await tokenResponse.json();
+    const access_token = tokenData.access_token;
+    if (access_token) {
+      fetchUserInfo(access_token);
+    } else {
+      console.error("Error fetching access token:", tokenData);
     }
-  }
+  };
 
-  const githubSignIn = async () => {
-    try {
-      console.log('GitHub Sign-In pressed')
-      
-      // GitHub OAuth 2.0 endpoints
-      const discovery = {
-        authorizationEndpoint: 'https://github.com/login/oauth/authorize',
-        tokenEndpoint: 'https://github.com/login/oauth/access_token',
+  const fetchUserInfo = async (token: string) => {
+    const userResponse = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const userData = await userResponse.json();
+    await authHandler({
+      name: userData.name!,
+      email: userData.email!,
+      avatar: userData.avatar_url!,
+    });
+  };
+  // github auth end
+
+  // const googleSignIn = async () => {
+  //   try {
+  //     await GoogleSignin.hasPlayServices();
+  //     const userInfo = await GoogleSignin.signIn();
+  //     if (userInfo.data?.user) {
+  //       await authHandler({
+  //         name: userInfo.data.user.name!,
+  //         email: userInfo.data.user.email!,
+  //         avatar: userInfo.data.user.photo!,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const authHandler = async ({
+    name,
+    email,
+    avatar,
+  }: {
+    name: string;
+    email: string;
+    avatar: string;
+  }) => {
+    const user = {
+      name,
+      email,
+      avatar,
+    };
+    const token = JWT.encode(
+      {
+        ...user,
+      },
+      process.env.EXPO_PUBLIC_JWT_SECRET_KEY!
+    );
+    const res = await axios.post(
+      `${process.env.EXPO_PUBLIC_SERVER_URI}/login`,
+      {
+        signedToken: token,
       }
+    );
+    await SecureStore.setItemAsync("accessToken", res.data.accessToken);
+    await SecureStore.setItemAsync("name", name);
+    await SecureStore.setItemAsync("email", email);
+    await SecureStore.setItemAsync("avatar", avatar);
 
-      // You'll need to register your app with GitHub and get a client ID
-      const clientId = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID
+    setModalVisible(false);
+    router.push("/(tabs)");
+  };
 
-      if (!clientId) {
-        Alert.alert(
-          'Configuration Needed', 
-          'GitHub OAuth not configured. Please add EXPO_PUBLIC_GITHUB_CLIENT_ID to your environment variables.'
-        )
-        return
-      }
+  const guestLogin = async () => {
+    // Store guest user data
+    await SecureStore.setItemAsync("accessToken", "guest_token");
+    await SecureStore.setItemAsync("name", "Guest User");
+    await SecureStore.setItemAsync("email", "guest@example.com");
+    await SecureStore.setItemAsync("avatar", "");
+    
+    setModalVisible(false);
+    router.push("/(tabs)");
+  };
 
-      // Create redirect URI - use custom scheme for builds
-      const redirectUri = AuthSession.makeRedirectUri({
-        scheme: 'lms'
-      })
-
-      console.log('GitHub OAuth - Using redirect URI:', redirectUri)
-      console.log('GitHub OAuth - Using client ID:', clientId)
-
-      const request = new AuthSession.AuthRequest({
-        clientId: clientId,
-        scopes: ['user:email'],
-        redirectUri: redirectUri,
-        responseType: AuthSession.ResponseType.Code,
-      })
-
-      const result = await request.promptAsync(discovery)
-
-      if (result.type === 'success') {
-        console.log('GitHub OAuth Success:', result)
-        Alert.alert(
-          'GitHub Sign-in', 
-          'GitHub authentication successful!',
-          [
-            {
-              text: 'Continue',
-              onPress: () => router.replace('/(tabs)')
-            }
-          ]
-        )
-        // Handle GitHub authentication success
-      } else if (result.type === 'cancel') {
-        console.log('User cancelled GitHub sign-in')
-      } else {
-        console.log('GitHub sign-in error:', result)
-        Alert.alert('Sign-in Error', 'GitHub authentication failed.')
-      }
-      
-    } catch (error) {
-      console.error('GitHub Sign-In error:', error)
-      Alert.alert('Sign-in Error', 'Unable to sign in with GitHub.')
-    }
-  }
-
-    return (
-      <BlurView className="flex-1 justify-center items-center">
-        <View style={{
+  return (
+    <BlurView
+      style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: windowWidth(30) }}  className="gap-4"
+    >
+      <Pressable
+        style={{
           width: windowWidth(420),
-          marginHorizontal: windowWidth(20),
+          height: windowHeight(320),
+          marginHorizontal: windowWidth(50),
           backgroundColor: "#fff",
           borderRadius: 30,
-          justifyContent: "center",
           alignItems: "center",
-          padding: windowWidth(20),
-        }}>
-          <View style={{
-            paddingVertical: windowHeight(20),
-            alignItems: "center",
-          }}>
-            <Text style={{
-              fontSize: fontSizes.FONT35,
-              fontFamily: "Poppins_700Bold",
-              textAlign: "center",
-            }}>
-              Be One of Us
-            </Text>
-            <Text style={{
-              fontSize: fontSizes.FONT15,
-              fontFamily: "Poppins_400Regular",
-              marginTop: windowHeight(10),
-              textAlign: "center",
-              paddingHorizontal: windowWidth(10),
-            }}>
-              Join our community and start your learning journey today!
-            </Text>
-          </View>
-
-          <View style={{
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: fontSizes.FONT32,
+            fontFamily: "Poppins_700Bold",
+            textAlign: "center",
+          }}
+        >
+          Join us and Be one of us!
+        </Text>
+        <Text
+          style={{
+            fontSize: fontSizes.FONT17,
+            paddingTop: windowHeight(5),
+            fontFamily: "Poppins_300Light",
+          }}
+        >
+          It's easier than you imagine!
+        </Text>
+        <View
+          style={{
+            paddingVertical: windowHeight(10),
             flexDirection: "row",
-            justifyContent: "center",
-            gap: windowWidth(40),
-            alignItems: "center",
-            width: "100%",
-            marginTop: windowHeight(20),
-            paddingBottom: windowHeight(20),
-          }}>
-            <Pressable onPress={() => googleSignIn()} style={{
-              padding: windowWidth(10),
-              borderRadius: 15,
-              backgroundColor: "#f8f9fa",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-            }}>
-              <Image source={require('@/assets/images/onboarding/google.png')} style={{
-                width: windowWidth(40),
-                height: windowHeight(40),
-                resizeMode: "contain",
-              }} />
-            </Pressable>
-
-            <Pressable onPress={() => githubSignIn()} style={{
-              padding: windowWidth(10),
-              borderRadius: 15,
-              backgroundColor: "#f8f9fa",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-            }}>
-              <Image source={require('@/assets/images/onboarding/github.png')} style={{
-                width: windowWidth(40),
-                height: windowHeight(40),
-                resizeMode: "contain",
-              }} />
-            </Pressable>
-          </View>
-
-          {/* Guest Sign-in Option */}
-          <View style={{
-            width: "100%",
-            marginTop: windowHeight(15),
-            paddingBottom: windowHeight(10),
-          }}>
-            <View style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: windowHeight(15),
-            }}>
-              <View style={{
-                flex: 1,
-                height: 1,
-                backgroundColor: "#e0e0e0",
-              }} />
-              <Text style={{
-                marginHorizontal: windowWidth(15),
-                fontSize: fontSizes.FONT12,
-                color: "#666",
-                fontFamily: "Poppins_400Regular",
-              }}>
-                or
-              </Text>
-              <View style={{
-                flex: 1,
-                height: 1,
-                backgroundColor: "#e0e0e0",
-              }} />
-            </View>
-
-            <Pressable 
-              onPress={guestSignIn}
+            gap: windowWidth(20),
+          }}
+        >
+          {/* <Pressable onPress={googleSignIn}>
+            <Image
+              source={require("@/assets/images/onboarding/google.png")}
               style={{
-                width: "100%",
-                padding: windowWidth(15),
-                borderRadius: 12,
-                backgroundColor: "transparent",
-                borderWidth: 1,
-                borderColor: "#e0e0e0",
-                alignItems: "center",
-                justifyContent: "center",
+                width: windowWidth(40),
+                height: windowHeight(40),
+                resizeMode: "contain",
               }}
-            >
-              <Text style={{
-                fontSize: fontSizes.FONT16,
-                fontFamily: "Poppins_500Medium",
-                color: "#666",
-              }}>
-                Continue as Guest
-              </Text>
-            </Pressable>
-          </View>
+            />
+          </Pressable> */}
+          <Pressable onPress={() => handleGithubLogin()}>
+            <Image
+              source={require("@/assets/images/onboarding/github.png")}
+              style={{
+                width: windowWidth(40),
+                height: windowHeight(40),
+                resizeMode: "contain",
+              }}
+            />
+          </Pressable>
+          {/* <Pressable>
+            <Image
+              source={require("@/assets/images/onboarding/apple.png")}
+              style={{
+                width: windowWidth(40),
+                height: windowHeight(40),
+                resizeMode: "contain",
+              }}
+            />
+          </Pressable> */}
         </View>
-      </BlurView>
-    )
-  }
-
-  export default authModal
+        
+        <Pressable
+          onPress={guestLogin}
+          style={{
+            marginTop: windowHeight(15),
+            paddingHorizontal: windowWidth(30),
+            paddingVertical: windowHeight(12),
+            backgroundColor: "#f0f0f0",
+            borderRadius: 25,
+            borderWidth: 1,
+            borderColor: "#ddd",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: fontSizes.FONT16,
+              fontFamily: "Poppins_500Medium",
+              color: "#666",
+              textAlign: "center",
+            }}
+          >
+            Continue as Guest
+          </Text>
+        </Pressable>
+      </Pressable>
+    </BlurView>
+  );
+}

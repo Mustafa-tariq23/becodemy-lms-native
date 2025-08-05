@@ -1,7 +1,8 @@
-const express = require('express');
-const dotenv = require('dotenv');
-import prisma from './utils/prisma';
+import express from 'express';
+import dotenv from 'dotenv';
+import prisma from './utils/prisma.js';
 import jwt from 'jsonwebtoken';
+import { sendToken } from './utils/sendToken.js';
 
 // Load environment variables
 dotenv.config();
@@ -30,11 +31,47 @@ app.use((req, res, next) => {
 app.post('/login', async (req, res) => {
   try {
       const { signedToken } = req.body;
+      
+      if (!signedToken) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Signed token is required" 
+        });
+      }
+
       const data = jwt.verify(signedToken, process.env.JWT_SECRET);
+      if (data) {
+        const isUserExists = await prisma.user.findUnique({
+          where: { email: data.email }
+        });
+        
+        if (isUserExists) {
+          await sendToken(isUserExists, res);
+        } else {
+          const newUser = await prisma.user.create({
+            data: {
+              email: data.email,
+              name: data.name,
+              avatar: data.avatar
+            }
+          });
+          await sendToken(newUser, res);
+        }
+      } else {
+        res.status(401).json({ 
+          success: false, 
+          error: "Couldn't verify your request. Try again later!!!" 
+        });
+      }
     } catch (error) {
       console.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Login failed. Please try again.',
+        details: error.message
+      });
     }
-})
+});
 
 app.get('/', (req, res) => {
   res.json({
@@ -77,7 +114,7 @@ app.use((err, req, res, next) => {
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     error: 'Route not found',
     method: req.method,
@@ -91,4 +128,4 @@ app.listen(PORT, () => {
   console.log(`📱 Ready to handle requests from your React Native app`);
 });
 
-module.exports = app;
+export default app;

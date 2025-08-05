@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "0dfa8098-14c1-4fbe-8373-67e1f68b2c44"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.exporeacthairynigga.server",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

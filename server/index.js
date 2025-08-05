@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import prisma from './utils/prisma.js';
 import jwt from 'jsonwebtoken';
 import { sendToken } from './utils/sendToken.js';
+import { isAuthenticated } from './middleware/isAuthenticated.js';
 
 // Load environment variables
 dotenv.config();
@@ -72,6 +73,20 @@ app.post('/login', async (req, res) => {
       });
     }
 });
+
+app.get('/me', isAuthenticated, async (req, res, next) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      success: true,
+      user,
+  });
+
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  }
+})
+
 
 app.get('/', (req, res) => {
   res.json({

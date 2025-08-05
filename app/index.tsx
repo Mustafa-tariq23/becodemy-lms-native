@@ -11,7 +11,7 @@ const index = () => {
 
   useEffect(() => {
     const subscription = async () => {
-      const token = SecureStore.getItem("accessToken");
+      const token = await SecureStore.getItemAsync("accessToken");
       setLoggedInUser(token ? true : false);
       setIsLoading(false);
     }

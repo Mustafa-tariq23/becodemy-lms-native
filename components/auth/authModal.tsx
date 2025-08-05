@@ -62,7 +62,7 @@ export default function AuthModal({
     const result = await WebBrowser.openAuthSessionAsync(
       request?.url!,
       makeRedirectUri({
-        scheme: "becodemy",
+        scheme: "lms", 
       })
     );
 
@@ -162,19 +162,22 @@ export default function AuthModal({
   };
 
   const guestLogin = async () => {
-    // Store guest user data
-    await SecureStore.setItemAsync("accessToken", "guest_token");
-    await SecureStore.setItemAsync("name", "Guest User");
-    await SecureStore.setItemAsync("email", "guest@example.com");
-    await SecureStore.setItemAsync("avatar", "");
-    
-    setModalVisible(false);
-    router.push("/(tabs)");
+    try {
+      // Store guest user data
+      await SecureStore.setItemAsync("accessToken", "guest_token");
+      await SecureStore.setItemAsync("name", "Guest User");
+      await SecureStore.setItemAsync("email", "guest@example.com");
+      await SecureStore.setItemAsync("avatar", "");
+      setModalVisible(false);
+      router.push("/(tabs)");
+    } catch (error) {
+      console.error("Error during guest login:", error);
+    }
   };
 
   return (
     <BlurView
-      style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: windowWidth(30) }}  className="gap-4"
+      style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: windowWidth(30) }}  className="gap-4 px-12"
     >
       <Pressable
         style={{
@@ -186,6 +189,7 @@ export default function AuthModal({
           alignItems: "center",
           justifyContent: "center",
         }}
+        className="px-8"
       >
         <Text
           style={{
@@ -194,16 +198,17 @@ export default function AuthModal({
             textAlign: "center",
           }}
         >
-          Join us and Be one of us!
+          Be one of us!
         </Text>
         <Text
           style={{
             fontSize: fontSizes.FONT17,
             paddingTop: windowHeight(5),
             fontFamily: "Poppins_300Light",
+            textAlign: "center",
           }}
         >
-          It's easier than you imagine!
+          Join us and start your journey with us.
         </Text>
         <View
           style={{
@@ -250,7 +255,7 @@ export default function AuthModal({
             marginTop: windowHeight(15),
             paddingHorizontal: windowWidth(30),
             paddingVertical: windowHeight(12),
-            backgroundColor: "#f0f0f0",
+            backgroundColor: "green",
             borderRadius: 25,
             borderWidth: 1,
             borderColor: "#ddd",
@@ -260,7 +265,7 @@ export default function AuthModal({
             style={{
               fontSize: fontSizes.FONT16,
               fontFamily: "Poppins_500Medium",
-              color: "#666",
+              color: "#fff",
               textAlign: "center",
             }}
           >

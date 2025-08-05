@@ -151,7 +151,7 @@ export default function Slide({
         }}
       >
         <Pressable className="flex-1" onPress={() => setModalVisible(false)}>
-          <AuthModal />
+          <AuthModal setModalVisible={setModalVisible} />
         </Pressable>
       </Modal>
     </>

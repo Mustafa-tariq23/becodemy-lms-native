@@ -1,4 +1,4 @@
-package com.lms
+package com.exporeacthairynigga.lms
 
 import android.app.Application
 import android.content.res.Configuration

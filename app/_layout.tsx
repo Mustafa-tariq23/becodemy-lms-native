@@ -1,6 +1,7 @@
 import React from 'react'
 import { SplashScreen, Stack } from 'expo-router'
 import { ThemeProvider } from '@/context/theme.context'
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler'
 
 import {
   Poppins_600SemiBold,
@@ -23,12 +24,14 @@ const _layout = () => {
   });
 
   return (
-    <ThemeProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(routes)/onboarding/index" />
-      </Stack>
-    </ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(routes)/onboarding/index" />
+          </Stack>
+        </ThemeProvider>
+      </GestureHandlerRootView>
   )
 }
 

@@ -140,6 +140,48 @@ export const NotificationsData = [
     message: "You have a new reply in your support question",
     status: "Unread",
   },
+  {
+    id: "3",
+    title: "New Comment Received",
+    message: "You have a new comment on your post",
+    status: "Unread",
+  },
+  {
+    id: "4",
+    title: "New Course Available",
+    message: "A new course has been added to your library",
+    status: "Read",
+  },
+  {
+    id: "5",
+    title: "Course Update",
+    message: "Your enrolled course has been updated with new content",
+    status: "Read",
+  },
+  {
+    id: "6",
+    title: "New Feature Released",
+    message: "Check out the new features in the app!",
+    status: "Read",
+  },
+  {
+    id: "7",
+    title: "Maintenance Notification",
+    message: "The app will be down for maintenance on Sunday",
+    status: "Read",
+  },
+  {
+    id: "8",
+    title: "New Comment on Your Post",
+    message: "Someone commented on your post",
+    status: "Unread",
+  },
+  {
+    id: "9",
+    title: "New Like on Your Post",
+    message: "Your post received a new like",
+    status: "Unread",
+  },
 ];
 
 
@@ -170,3 +212,56 @@ export const FAQData = [
       "For security reasons, course videos cannot be downloaded. However, you have lifetime access to each purchased course and can watch them anytime, anywhere with your account",
   },
 ];
+
+export const staticTickets: TicketsTypes[] = [
+    {
+      id: "1",
+      creatorId: "user1",
+      ticketTitle: "Unable to access course videos",
+      reply: [],
+      details: "I'm having trouble accessing the video content in my enrolled course. The videos won't load properly.",
+      status: "Pending",
+      createdAt: new Date("2024-08-05"),
+      updatedAt: new Date("2024-08-05"),
+    },
+    {
+      id: "2",
+      creatorId: "user1",
+      ticketTitle: "Payment issue with course enrollment",
+      reply: [],
+      details: "My payment was deducted but I haven't received access to the course. Please help resolve this issue.",
+      status: "Closed",
+      createdAt: new Date("2024-08-03"),
+      updatedAt: new Date("2024-08-04"),
+    },
+    {
+      id: "3",
+      creatorId: "user1",
+      ticketTitle: "App crashes when opening assignments",
+      reply: [],
+      details: "The mobile app crashes every time I try to open the assignments section. This is affecting my learning progress.",
+      status: "Pending",
+      createdAt: new Date("2024-08-06"),
+      updatedAt: new Date("2024-08-06"),
+    },
+    {
+      id: "4",
+      creatorId: "user1",
+      ticketTitle: "Certificate download not working",
+      reply: [],
+      details: "I completed the course but unable to download the completion certificate. The download button is not responding.",
+      status: "Closed",
+      createdAt: new Date("2024-08-01"),
+      updatedAt: new Date("2024-08-02"),
+    },
+    {
+      id: "5",
+      creatorId: "user1",
+      ticketTitle: "Quiz submission failed",
+      reply: [],
+      details: "My quiz answers were not submitted properly and now it shows as incomplete. I need this to be corrected.",
+      status: "Pending",
+      createdAt: new Date("2024-08-07"),
+      updatedAt: new Date("2024-08-07"),
+    },
+  ];

@@ -1,12 +1,8 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-
-const notification = () => {
-  return (
-    <View>
-      <Text>notification</Text>
-    </View>
-  )
+import NotificationScreen from '@/screens/notifications/notificationScreen'
+const Notification  = () => {
+  return <NotificationScreen/>
 }
 
-export default notification
+export default Notification

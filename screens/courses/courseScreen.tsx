@@ -1,7 +1,6 @@
 import { View, Text, ScrollView, StatusBar } from 'react-native'
 import React from 'react'
 import { useTheme } from '@/context/theme.context'
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import GradientText from '@/components/common/GradientText'
 import { fontSizes } from '@/themes/app.constant'

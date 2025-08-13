@@ -12,7 +12,6 @@ const resourcesScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.dark ? '#131313' : 'white' }}>
-      <ScrollView showsVerticalScrollIndicator={false}>
         <View className='pb-[bottomTabBarHeight - 20]]'>
           <FlatList 
             data={videoLessonsData} 
@@ -23,7 +22,6 @@ const resourcesScreen = () => {
             className='pt-[verticalScale(10)]'
           />
         </View>
-      </ScrollView>
     </SafeAreaView> 
   )
 }

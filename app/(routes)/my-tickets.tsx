@@ -1,12 +1,9 @@
 import { View, Text } from 'react-native'
 import React from 'react'
+import MyTicketsScreen from '@/screens/my-tickets/MyTicketsScreen'
 
 const MyTickets = () => {
-  return (
-    <View>
-      <Text>My Tickets</Text>
-    </View>
-  )
+  return <MyTicketsScreen />
 }
 
 export default MyTickets

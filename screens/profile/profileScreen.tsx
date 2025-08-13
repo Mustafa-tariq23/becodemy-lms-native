@@ -1,15 +1,17 @@
 import {
-  Image,
-  Linking,
+  Alert,
   Pressable,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
+  Image,
+  Modal,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useTheme } from "@/context/theme.context";
 import useUser from "@/hooks/fetch/useUser";
 import useUserData from "@/hooks/useUserData";
@@ -32,16 +34,79 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import * as ImagePicker from "expo-image-picker";
+import IconOne from "@/assets/svgs/onboarding/icon-1";
 
 export default function ProfileScreen() {
   const { theme } = useTheme();
-  const { user, loading } = useUser();
-  const { name, email, avatar } = useUserData();
+  const { user } = useUser();
+  const { name, email } = useUserData();
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [image, setImage] = useState<string | null>(null);
+  const onImageChangePress = () => {
+    setModalOpen(true);
+  };
 
   const logoutHandler = async () => {
     await SecureStore.deleteItemAsync("accessToken");
     router.push("/(routes)/onboarding");
   };
+
+  const uploadImage = async () => {
+    try {
+      await ImagePicker.requestCameraPermissionsAsync();
+      let result = await ImagePicker.launchCameraAsync({
+        cameraType: ImagePicker.CameraType.front,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1
+      })
+
+      if (!result.canceled) {
+        saveImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert("Error uploading image. Try again later!!!");
+      setModalOpen(false);
+    }
+  }
+
+  const uploadFromGallery = async () => {
+    try {
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1
+      });
+
+      if (!result.canceled) {
+        saveImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert("Error uploading image. Try again later!!!");
+      setModalOpen(false);
+    }
+  }
+
+  const saveImage = async (image: string) => {
+    try {
+      setImage(image);
+      setModalOpen(false);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  const removeImage  =  () => {
+    try {
+      setImage(null);
+      setModalOpen(false);
+    } catch (error) {
+      throw error;
+    }
+  }
 
   return (
     <View
@@ -52,6 +117,7 @@ export default function ProfileScreen() {
         },
       ]}
     >
+
       <LinearGradient
         colors={
           theme.dark
@@ -73,8 +139,62 @@ export default function ProfileScreen() {
         </SafeAreaView>
       </LinearGradient>
 
+      {/* profile picture */}
+
+      <View className="flex items-center justify-center -mt-40 mb-4 z-50">
+
+        <TouchableOpacity onPress={() => { }}>
+          <Image
+            source={image ? { uri: image } : require('@/assets/images/icon.png')}
+            className="h-40 w-40 rounded-full border-4 border-gray-500"
+          />
+          <TouchableOpacity className="flex items-center justify-center mt-2" onPress={onImageChangePress}>
+            <Text className="text-blue-500">Change Picture</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+        {/* <View>
+          <Text className="text-white text-2xl font-bold">Profile Picture</Text>
+        </View> */}
+        {/* <Image source={{ uri: avatar }} style={styles.profileImage} /> */}
+      </View>
+
       {/* Profile wrapper */}
+
+      <Modal visible={modalOpen} animationType="slide" transparent={true} className="flex-1 justify-center items-center bg-black bg-opacity-50">
+        <View className="flex-1 items-center justify-center m-6 my-72 bg-white rounded-lg p-7 shadow-lg">
+          <Text className="text-lg font-bold">Change Profile Picture</Text>
+
+          <View className="flex-row justify-around gap-4">
+            {/* camera icon */}
+            <TouchableOpacity className="mt-4 items-center gap-1 bg-gray-100 p-2 rounded-lg w-20" onPress={uploadImage}>
+              <MaterialIcons name="camera-alt" size={24} color="black" />
+              <Text>Camera</Text>
+            </TouchableOpacity>
+
+            {/* Gallery Icon */}
+            <TouchableOpacity className="mt-4 items-center gap-1 bg-gray-100 p-2 rounded-lg w-20" onPress={uploadFromGallery}>
+              <MaterialIcons name="photo-library" size={24} color="black" />
+              <Text>Gallery</Text>
+            </TouchableOpacity>
+
+            {/* Remove Icon */}
+            <TouchableOpacity className="mt-4 items-center gap-1 bg-gray-100 p-2 rounded-lg w-20" onPress={removeImage}>
+              <MaterialIcons name="delete" size={24} color="black" />
+              <Text>Remove</Text>
+            </TouchableOpacity>
+
+            {/* Close */}
+            <TouchableOpacity className="mt-4 items-center gap-1 bg-gray-100 p-2 rounded-lg w-20" onPress={() => setModalOpen(false)}>
+              <MaterialIcons name="close" size={24} color="red" />
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+
       <View
+        className="mt-32 z-0"
         style={[
           styles.profileWrapper,
           {
@@ -86,9 +206,6 @@ export default function ProfileScreen() {
         ]}
       >
         <View style={{ flexDirection: "row" }}>
-          {avatar && (
-            <Image source={{ uri: avatar }} style={styles.profileImage} />
-          )}
           <View style={styles.profileTextContainer}>
             <Text
               style={[
@@ -107,6 +224,8 @@ export default function ProfileScreen() {
                   color: theme.dark ? "#a0a0b0" : "#8a8a8a",
                 }
               ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {email || "Guest@example.com"}
             </Text>
@@ -119,7 +238,7 @@ export default function ProfileScreen() {
             start={{ x: 0, y: 1 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={styles.statNumber}>{user?.orders?.length}</Text>
+            <Text style={styles.statNumber}>{user?.orders?.length ?? 0}</Text>
             <Text style={styles.statLabel}>Enrolled</Text>
           </LinearGradient>
           <LinearGradient
@@ -135,429 +254,482 @@ export default function ProfileScreen() {
       </View>
 
       {/* Profile options */}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={[
+          {
+            paddingHorizontal: scale(20),
+            paddingTop: scale(20),
+          },
+          {
+            backgroundColor: theme.dark ? "#101010" : "#f8f9fa",
+          },
+        ]}
+      // contentContainerStyle={{ paddingBottom: scale(400) }}
+      >
+        <Pressable
           style={[
+            styles.menuItem,
             {
-              paddingHorizontal: scale(20),
-              paddingTop: scale(20),
-              paddingBottom: scale(400), 
-            },
-            {
-              backgroundColor: theme.dark ? "#101010" : "#f8f9fa",
-            },
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+            }
           ]}
+          onPress={() =>
+            router.push({
+              pathname: "/(routes)/enrolled-courses",
+              params: { courses: JSON.stringify(user?.orders ?? []) },
+            })
+          }
         >
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-            onPress={() =>
-              router.push({
-                pathname: "/(routes)/enrolled-courses",
-                params: { courses: JSON.stringify(user?.orders) },
-              })
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <Feather
+                name="book-open"
+                size={scale(21)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
+                style={[
+                  styles.menuText,
+                  {
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
+                  }
+                ]}
+              >
+                Enrolled Courses
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                Explore your all enrolled courses
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
             }
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
+          ]}
+          onPress={() =>
+            Alert.alert("Coming soon", "Leaderboard will be available soon.")
+          }
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <MaterialIcons
+                name="leaderboard"
+                size={scale(23)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
                 style={[
-                  styles.iconContainer,
+                  styles.menuText,
                   {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
                   }
                 ]}
               >
-                <Feather
-                  name="book-open"
-                  size={scale(21)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  Enrolled Courses
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Explore your all enrolled courses
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
+                Course Leaderboard
+              </Text>
+              <Text
                 style={[
-                  styles.iconContainer,
+                  styles.menuSubText,
                   {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
                   }
                 ]}
               >
-                <MaterialIcons
-                  name="leaderboard"
-                  size={scale(23)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  Course Leaderboard
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Let's see your position in Leaderboard
-                </Text>
-              </View>
+                Let's see your position in Leaderboard
+              </Text>
             </View>
-          </Pressable>
+          </View>
+        </Pressable>
 
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-            onPress={() => router.push("/(routes)/my-tickets")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
-                  }
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="message-alert-outline"
-                  size={scale(22)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  My Tickets
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Explore your all support tickets
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-            onPress={() => router.push("/(routes)/support-center")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
-                  }
-                ]}
-              >
-                <FontAwesome
-                  name="support"
-                  size={scale(22)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  Support Center
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Explore our fastest support center
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-            onPress={() => router.push("/(routes)/notification")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
-                  }
-                ]}
-              >
-                <Ionicons
-                  name="notifications"
-                  size={scale(22)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  Notifications
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Explore the important notifications
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-            onPress={() => router.push("/(routes)/settings")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
-                  }
-                ]}
-              >
-                <Ionicons
-                  name="settings-sharp"
-                  size={scale(23)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  Settings
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Control the app as per your preferences
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-              }
-            ]}
-            onPress={async () =>
-              await WebBrowser.openBrowserAsync(
-                "https://www.becodemy.com/privacy-policy"
-              )
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
             }
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
+          ]}
+          onPress={() => router.push("/(routes)/my-tickets")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="message-alert-outline"
+                size={scale(22)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
                 style={[
-                  styles.iconContainer,
+                  styles.menuText,
                   {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
-                    borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
                   }
                 ]}
               >
-                <MaterialIcons
-                  name="policy"
-                  size={scale(23)}
-                  color={theme.dark ? "#8b5cf6" : "#0047AB"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ffffff" : "#1a1a2e",
-                    }
-                  ]}
-                >
-                  Privacy & Policy
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#a0a0b0" : "#666666",
-                    }
-                  ]}
-                >
-                  Explore our privacy and policy
-                </Text>
-              </View>
+                My Tickets
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                Explore your all support tickets
+              </Text>
             </View>
-          </Pressable>
+          </View>
+        </Pressable>
 
-          <Pressable
-            style={[
-              styles.menuItem,
-              {
-                backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
-                marginBottom: verticalScale(100),
-              }
-            ]}
-            onPress={() => logoutHandler()}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+            }
+          ]}
+          onPress={() => router.push("/(routes)/support-center")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <FontAwesome
+                name="support"
+                size={scale(22)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
                 style={[
-                  styles.iconContainer,
+                  styles.menuText,
                   {
-                    backgroundColor: theme.dark ? "#2a2a40" : "#fff0f0",
-                    borderColor: theme.dark ? "#ff6b6b" : "#ffcccb",
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
                   }
                 ]}
               >
-                <MaterialIcons
-                  name="logout"
-                  size={scale(23)}
-                  color={theme.dark ? "#ff6b6b" : "#dc3545"}
-                />
-              </View>
-              <View>
-                <Text
-                  style={[
-                    styles.menuText,
-                    {
-                      color: theme?.dark ? "#ff6b6b" : "#dc3545",
-                    }
-                  ]}
-                >
-                  Log Out
-                </Text>
-                <Text
-                  style={[
-                    styles.menuSubText,
-                    {
-                      color: theme?.dark ? "#ff9999" : "#dc3545",
-                      opacity: 0.7,
-                    }
-                  ]}
-                >
-                  Logging out from your account
-                </Text>
-              </View>
+                Support Center
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                Explore our fastest support center
+              </Text>
             </View>
-          </Pressable>
-        </ScrollView>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+            }
+          ]}
+          onPress={() => router.push("/(routes)/notification")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <Ionicons
+                name="notifications"
+                size={scale(22)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
+                style={[
+                  styles.menuText,
+                  {
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
+                  }
+                ]}
+              >
+                Notifications
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                Explore the important notifications
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+            }
+          ]}
+          onPress={() => router.push("/(routes)/faq")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <Ionicons
+                name="settings-sharp"
+                size={scale(23)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
+                style={[
+                  styles.menuText,
+                  {
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
+                  }
+                ]}
+              >
+                FAQS
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                See all the frequently asked questions
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+            }
+          ]}
+          onPress={() => router.push("/(routes)/settings")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <Ionicons
+                name="settings-sharp"
+                size={scale(23)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
+                style={[
+                  styles.menuText,
+                  {
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
+                  }
+                ]}
+              >
+                Settings
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                Control the app as per your preferences
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+            }
+          ]}
+          onPress={async () =>
+            await WebBrowser.openBrowserAsync(
+              "https://www.becodemy.com/privacy-policy"
+            )
+          }
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#f8f7ff",
+                  borderColor: theme.dark ? "#3a3a55" : "#E2DDFF",
+                }
+              ]}
+            >
+              <MaterialIcons
+                name="policy"
+                size={scale(23)}
+                color={theme.dark ? "#8b5cf6" : "#0047AB"}
+              />
+            </View>
+            <View>
+              <Text
+                style={[
+                  styles.menuText,
+                  {
+                    color: theme?.dark ? "#ffffff" : "#1a1a2e",
+                  }
+                ]}
+              >
+                Privacy Policy
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#a0a0b0" : "#666666",
+                  }
+                ]}
+              >
+                Read our privacy policy
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            {
+              backgroundColor: theme.dark ? "#1a1a2e" : "#ffffff",
+              marginBottom: verticalScale(100),
+            }
+          ]}
+          onPress={() => logoutHandler()}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  backgroundColor: theme.dark ? "#2a2a40" : "#fff0f0",
+                  borderColor: theme.dark ? "#ff6b6b" : "#ffcccb",
+                }
+              ]}
+            >
+              <MaterialIcons
+                name="logout"
+                size={scale(23)}
+                color={theme.dark ? "#ff6b6b" : "#dc3545"}
+              />
+            </View>
+            <View>
+              <Text
+                style={[
+                  styles.menuText,
+                  {
+                    color: theme?.dark ? "#ff6b6b" : "#dc3545",
+                  }
+                ]}
+              >
+                Log Out
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubText,
+                  {
+                    color: theme?.dark ? "#ff9999" : "#dc3545",
+                    opacity: 0.7,
+                  }
+                ]}
+              >
+                Logging out from your account
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }
@@ -592,7 +764,7 @@ const styles = StyleSheet.create({
         : IsIPAD
           ? verticalScale(185)
           : verticalScale(155),
-    marginTop: verticalScale(-90),
+    marginTop: verticalScale(0),
     alignSelf: "center",
     borderRadius: scale(20),
     padding: scale(15),

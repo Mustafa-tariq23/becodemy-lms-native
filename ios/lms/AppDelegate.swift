@@ -1,6 +1,7 @@
 import Expo
 import React
 import ReactAppDependencyProvider
+#import <Firebase.h>
 
 @UIApplicationMain
 public class AppDelegate: ExpoAppDelegate {

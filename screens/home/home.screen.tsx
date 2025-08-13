@@ -1,4 +1,4 @@
-import { View, Text, Dimensions, Button } from 'react-native'
+import { View, Text, Dimensions, Button, Modal, TouchableOpacity, PermissionsAndroid } from 'react-native'
 import React from 'react'
 import { useRouter } from 'expo-router'
 import * as SecureStore from 'expo-secure-store'
@@ -11,30 +11,56 @@ import { fontSizes, windowHeight, windowWidth } from '@/themes/app.constant';
 import { verticalScale } from 'react-native-size-matters';
 import GradientText from '@/components/common/GradientText';
 import SkeltonLoader from '@/utils/skelton'
+import useLocation from '@/hooks/location/useLocation';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const HomeScreen = () => {
   const router = useRouter();
   const { theme } = useTheme();
   let [loading, setLoading] = React.useState(true);
+  const [openModal, setOpenModal] = React.useState(false);
+  let { errorMsg, longitude, latitude } = useLocation();
 
-  const handleLogout = async () => {
-    // Clear all stored credentials
-    await SecureStore.deleteItemAsync("accessToken");
-    await SecureStore.deleteItemAsync("name");
-    await SecureStore.deleteItemAsync("email");
-    await SecureStore.deleteItemAsync("avatar");
 
-    router.push('/onboarding');
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission',
+          message:
+            'Allow access to your location ' +
+            'so we can suggest you amazing courses according to your geolocation.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the location');
+      } else {
+        console.log('Location permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
   };
 
   return (
     <LinearGradient colors={theme.dark ? ['#180D41', '#2A2D32', '#131313'] : ['#FFFFFF', '#F7F7F7']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ height: Dimensions.get('window').height, justifyContent: "flex-start", backgroundColor: theme.dark ? "#101010" : "#ffffff" }} >
       <WelcomeHeader />
+      <TouchableOpacity onPress={() => router.push('/(routes)/location')}>
+        <View className='flex-row items-center justify-center gap-2 p-2'>
+          <MaterialIcons name="location-on" size={24} color="black" />
+          <Text>location</Text>
+        </View>
+      </TouchableOpacity>
+
       <ScrollView showsVerticalScrollIndicator={false}>
         <HomeBanner />
         <View style={{ marginHorizontal: windowWidth(20), marginTop: verticalScale(-25) }}>
           <View style={{ flexDirection: "row", marginTop: windowHeight(5) }}>
-            <Text style={{fontSize: fontSizes.FONT35}} className={theme.dark ? 'text-white' : 'text-black'}>
+            <Text style={{ fontSize: fontSizes.FONT35 }} className={theme.dark ? 'text-white' : 'text-black'}>
               Popular
             </Text>
             <GradientText text=" Courses" styles={{ fontSize: fontSizes.FONT35, fontFamily: 'Poppins_500Medium' }} />
@@ -54,21 +80,27 @@ const HomeScreen = () => {
         </View>
 
         {
-          loading? (
+          loading ? (
             <>
-              <SkeltonLoader/>
-              <SkeltonLoader/>
+              <SkeltonLoader />
+              <SkeltonLoader />
             </>
-          ): (
+          ) : (
             <>
-            <View>
+              <View>
 
-            </View>
+              </View>
             </>
           )
         }
-        
+
       </ScrollView>
+      <Modal visible={openModal} animationType="slide">
+        <TouchableOpacity>
+          <Text>Allow to access Location.</Text>
+          <Button title="Allow" onPress={() => { }} />
+        </TouchableOpacity>
+      </Modal>
     </LinearGradient>
   )
 }

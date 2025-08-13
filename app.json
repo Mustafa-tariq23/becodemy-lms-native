@@ -10,7 +10,15 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.exporeacthairynigga.lms"
+      "bundleIdentifier": "com.exporeacthairynigga.lms",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow lms to access your location while you are using the app.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow lms to access your location even when the app is in the background.",
+        "NSLocationAlwaysUsageDescription": "Allow lms to access your location at all times to enable background features.",
+        "UIBackgroundModes": [
+          "location"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,6 +42,13 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow lms to access your location while using the app.",
+          "locationAlwaysAndWhenInUsePermission": "Allow lms to use your location even in the background."
         }
       ],
       "expo-secure-store",

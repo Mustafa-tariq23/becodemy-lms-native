@@ -1,4 +1,6 @@
 import React from 'react'
+import "@/global.css";
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { SplashScreen, Stack } from 'expo-router'
 import { ThemeProvider } from '@/context/theme.context'
 import { AuthProvider } from '@/context/auth.context'
@@ -26,14 +28,14 @@ const _layout = () => {
   });
 
   return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
+    <GluestackUIProvider mode="light"><GestureHandlerRootView style={{ flex: 1 }}>
         <AuthProvider>
           <ThemeProvider>
             <MainNavigation />
           </ThemeProvider>
         </AuthProvider>
-      </GestureHandlerRootView>
-  )
+      </GestureHandlerRootView></GluestackUIProvider>
+  );
 }
 
 export default _layout

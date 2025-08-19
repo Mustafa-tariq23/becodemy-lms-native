@@ -143,17 +143,15 @@ export default function AuthModal({
       email,
       avatar,
     };
-    const token = JWT.encode(
-      {
-        ...user,
-      },
-      process.env.EXPO_PUBLIC_JWT_SECRET_KEY!
-    );
+    // const token = JWT.encode(
+    //   {
+    //     ...user,
+    //   },
+    //   process.env.EXPO_PUBLIC_JWT_SECRET_KEY!
+    // );
     const res = await axios.post(
       `${process.env.EXPO_PUBLIC_SERVER_URI}/login`,
-      {
-        signedToken: token,
-      }
+      { user }
     );
     await SecureStore.setItemAsync("accessToken", res.data.accessToken);
     await SecureStore.setItemAsync("name", name);

@@ -1,6 +1,8 @@
 import React from 'react'
 import { SplashScreen, Stack } from 'expo-router'
 import { ThemeProvider } from '@/context/theme.context'
+import { AuthProvider } from '@/context/auth.context'
+import MainNavigation from '@/components/navigation/MainNavigation'
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler'
 
 import {
@@ -25,12 +27,11 @@ const _layout = () => {
 
   return (
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <ThemeProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(routes)/onboarding/index" />
-          </Stack>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <MainNavigation />
+          </ThemeProvider>
+        </AuthProvider>
       </GestureHandlerRootView>
   )
 }

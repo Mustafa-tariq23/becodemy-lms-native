@@ -174,4 +174,17 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // Firebase BoM (centralizes versions for all Firebase libraries) - updated to 34.1.0 per setup guide
+    implementation platform('com.google.firebase:firebase-bom:34.1.0')
+    // Cloud Messaging (already used for push notifications)
+    implementation 'com.google.firebase:firebase-messaging'
+    // In-App Messaging Display (to show contextual messages)
+    implementation 'com.google.firebase:firebase-inappmessaging-display'
+    // Analytics (required for event triggers & campaign targeting for In-App Messaging)
+    implementation 'com.google.firebase:firebase-analytics'
 }
+
+// Apply Google Services plugin to read google-services.json
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'

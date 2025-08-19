@@ -1,5 +1,5 @@
 import React from 'react';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Region } from 'react-native-maps';
 import { Button, SafeAreaView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,31 +9,41 @@ export default function App() {
   const { longitude, latitude } = useLocation();
   const router = useRouter();
 
-  const [mapRegion, setMapRegion] = React.useState({
+  // Region state (provide defaults so Region is always valid numbers)
+  const [mapRegion, setMapRegion] = React.useState<Region>({
     latitude: latitude ?? 31.28174,
     longitude: longitude ?? 74.161894,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
   });
 
+  // Update map center once we obtain a fresh location from the hook
+  React.useEffect(() => {
+    if (typeof latitude === 'number' && typeof longitude === 'number') {
+      setMapRegion(r => ({ ...r, latitude, longitude }));
+    }
+  }, [latitude, longitude]);
+
   return (
-    <View>
-      <SafeAreaView>
-        <View className='items-center justify-start p-2 flex-row gap-0'>
-          <MaterialIcons name="arrow-left" size={24} />
-          <Button title="Back" onPress={() => router.back()} />
-        </View>
-        <MapView
-          style={{ width: '100%', height: '100%' }}
-          region={mapRegion}
-          onRegionChangeComplete={setMapRegion}
-        >
-          {(typeof mapRegion.latitude === 'number' && typeof mapRegion.longitude === 'number') && (
-            <Marker coordinate={{ latitude: mapRegion.latitude, longitude: mapRegion.longitude }} />
-          )}
-        </MapView>
-      </SafeAreaView>
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header} className="flex-row items-center gap-1 p-2">
+        <MaterialIcons name="arrow-left" size={24} onPress={() => router.back()} />
+        <Button title="Back" onPress={() => router.back()} />
+      </View>
+      <MapView
+        style={styles.map}
+        region={mapRegion}
+        onRegionChangeComplete={(region: Region) => setMapRegion(region)}
+      >
+        <Marker coordinate={{ latitude: mapRegion.latitude, longitude: mapRegion.longitude }} />
+      </MapView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
+  map: { flex: 1 },
+  header: { zIndex: 10, backgroundColor: 'transparent' },
+});
 

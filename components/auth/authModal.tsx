@@ -2,6 +2,7 @@ import { View, Text, Pressable, Image, Platform } from "react-native";
 import React, { useEffect } from "react";
 import { BlurView } from "expo-blur";
 import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
+import { useAuth } from "@/context/auth.context";
 // import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import JWT from "expo-jwt";
@@ -9,12 +10,14 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function AuthModal({
   setModalVisible,
 }: {
   setModalVisible: (modal: boolean) => void;
 }) {
+  const { loginAsGuest } = useAuth();
   // const configureGoogleSignIn = () => {
   //   if (Platform.OS === "ios") {
   //     GoogleSignin.configure({
@@ -163,16 +166,22 @@ export default function AuthModal({
 
   const guestLogin = async () => {
     try {
-      // Store guest user data
-      await SecureStore.setItemAsync("accessToken", "guest_token");
-      await SecureStore.setItemAsync("name", "Guest User");
-      await SecureStore.setItemAsync("email", "guest@example.com");
-      await SecureStore.setItemAsync("avatar", "");
+      await loginAsGuest();
       setModalVisible(false);
       router.push("/(tabs)");
     } catch (error) {
       console.error("Error during guest login:", error);
     }
+  };
+
+  const handleEmailLogin = () => {
+    setModalVisible(false);
+    router.push("/(auth)/login");
+  };
+
+  const handleEmailSignup = () => {
+    setModalVisible(false);
+    router.push("/(auth)/signup");
   };
 
   return (
@@ -182,7 +191,7 @@ export default function AuthModal({
       <Pressable
         style={{
           width: windowWidth(420),
-          height: windowHeight(320),
+          height: windowHeight(480),
           marginHorizontal: windowWidth(50),
           backgroundColor: "#fff",
           borderRadius: 30,
@@ -210,11 +219,78 @@ export default function AuthModal({
         >
           Join us and start your journey with us.
         </Text>
+
+        {/* Email/Password Auth Buttons */}
+        <View style={{ paddingVertical: windowHeight(15), gap: windowHeight(10) }}>
+          <Pressable
+            onPress={handleEmailLogin}
+            style={{
+              paddingHorizontal: windowWidth(30),
+              paddingVertical: windowHeight(12),
+              backgroundColor: "#3b82f6",
+              borderRadius: 25,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: windowWidth(10),
+            }}
+          >
+            <Ionicons name="mail-outline" size={20} color="#fff" />
+            <Text
+              style={{
+                fontSize: fontSizes.FONT16,
+                fontFamily: "Poppins_500Medium",
+                color: "#fff",
+                textAlign: "center",
+              }}
+            >
+              Sign In with Email
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleEmailSignup}
+            style={{
+              paddingHorizontal: windowWidth(30),
+              paddingVertical: windowHeight(12),
+              backgroundColor: "#fff",
+              borderRadius: 25,
+              borderWidth: 2,
+              borderColor: "#3b82f6",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: windowWidth(10),
+            }}
+          >
+            <Ionicons name="person-add-outline" size={20} color="#3b82f6" />
+            <Text
+              style={{
+                fontSize: fontSizes.FONT16,
+                fontFamily: "Poppins_500Medium",
+                color: "#3b82f6",
+                textAlign: "center",
+              }}
+            >
+              Create Account
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Divider */}
+        <View style={{ flexDirection: "row", alignItems: "center", marginVertical: windowHeight(5) }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#ddd" }} />
+          <Text style={{ marginHorizontal: 10, color: "#666", fontSize: fontSizes.FONT14 }}>or</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: "#ddd" }} />
+        </View>
+
+        {/* Social Auth */}
         <View
           style={{
-            paddingVertical: windowHeight(10),
+            paddingVertical: windowHeight(5),
             flexDirection: "row",
             gap: windowWidth(20),
+            justifyContent: "center",
           }}
         >
           {/* <Pressable onPress={googleSignIn}>
@@ -227,7 +303,7 @@ export default function AuthModal({
               }}
             />
           </Pressable> */}
-          <Pressable onPress={() => handleGithubLogin()}>
+          {/* <Pressable onPress={() => handleGithubLogin()}>
             <Image
               source={require("@/assets/images/onboarding/github.png")}
               style={{
@@ -236,7 +312,8 @@ export default function AuthModal({
                 resizeMode: "contain",
               }}
             />
-          </Pressable>
+            <Text>Sign in with GitHub</Text>
+          </Pressable> */}
           {/* <Pressable>
             <Image
               source={require("@/assets/images/onboarding/apple.png")}
@@ -252,20 +329,25 @@ export default function AuthModal({
         <Pressable
           onPress={guestLogin}
           style={{
-            marginTop: windowHeight(15),
+            marginTop: windowHeight(10),
             paddingHorizontal: windowWidth(30),
             paddingVertical: windowHeight(12),
-            backgroundColor: "green",
+            backgroundColor: "#f3f4f6",
             borderRadius: 25,
             borderWidth: 1,
             borderColor: "#ddd",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: windowWidth(10),
           }}
         >
+          <Ionicons name="person-outline" size={20} color="#374151" />
           <Text
             style={{
               fontSize: fontSizes.FONT16,
               fontFamily: "Poppins_500Medium",
-              color: "#fff",
+              color: "#374151",
               textAlign: "center",
             }}
           >

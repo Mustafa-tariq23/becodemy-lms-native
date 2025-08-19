@@ -11,10 +11,10 @@ const resourcesScreen = () => {
   const bottomTabBarHeight = useBottomTabBarHeight()
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.dark ? '#131313' : 'white' }}>
-        <View className='pb-[bottomTabBarHeight - 20]]'>
-          <FlatList 
-            data={videoLessonsData} 
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.dark ? '#131313' : 'white' }} className='mb-8'>
+        <View className='pb-[bottomTabBarHeight - 20]'>
+          <FlatList
+            data={videoLessonsData}
             renderItem={({ item }) => (
               <SourceCodeCard item={item} />
             )}

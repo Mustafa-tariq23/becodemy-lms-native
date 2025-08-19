@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useTheme } from "@/context/theme.context";
+import { useAuth } from "@/context/auth.context";
 import useUser from "@/hooks/fetch/useUser";
 import useUserData from "@/hooks/useUserData";
 import { LinearGradient } from "expo-linear-gradient";
@@ -39,6 +40,7 @@ import IconOne from "@/assets/svgs/onboarding/icon-1";
 
 export default function ProfileScreen() {
   const { theme } = useTheme();
+  const { logout, user: authUser, isAnonymous } = useAuth();
   const { user } = useUser();
   const { name, email } = useUserData();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -48,8 +50,15 @@ export default function ProfileScreen() {
   };
 
   const logoutHandler = async () => {
-    await SecureStore.deleteItemAsync("accessToken");
-    router.push("/(routes)/onboarding");
+    try {
+      // Clear any local tokens
+      await SecureStore.deleteItemAsync("accessToken");
+      // Sign out from Firebase
+      await logout();
+      // Navigation will be handled automatically by AuthGuard
+    } catch (error) {
+      Alert.alert("Error", "Failed to logout. Please try again.");
+    }
   };
 
   const uploadImage = async () => {
@@ -215,7 +224,7 @@ export default function ProfileScreen() {
                 },
               ]}
             >
-              {name || "Guest"}
+              {authUser?.displayName || name || (isAnonymous ? "Guest User" : "User")}
             </Text>
             <Text
               style={[
@@ -227,8 +236,13 @@ export default function ProfileScreen() {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {email || "Guest@example.com"}
+              {authUser?.email || email || (isAnonymous ? "Browse as Guest" : "No email")}
             </Text>
+            {isAnonymous && (
+              <View style={styles.guestBadge}>
+                <Text style={styles.guestBadgeText}>Guest Account</Text>
+              </View>
+            )}
           </View>
         </View>
         <View style={styles.statsContainer}>
@@ -856,5 +870,19 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.FONT15,
     fontFamily: "Poppins_400Regular",
     opacity: 0.6,
+  },
+  guestBadge: {
+    backgroundColor: "#fbbf24",
+    borderRadius: scale(12),
+    paddingHorizontal: scale(8),
+    paddingVertical: scale(4),
+    marginTop: scale(8),
+    alignSelf: "center",
+  },
+  guestBadgeText: {
+    color: "#92400e",
+    fontSize: fontSizes.FONT12,
+    fontFamily: "Poppins_500Medium",
+    textAlign: "center",
   },
 });

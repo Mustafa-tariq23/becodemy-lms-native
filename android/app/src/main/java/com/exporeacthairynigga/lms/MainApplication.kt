@@ -1,6 +1,9 @@
 package com.exporeacthairynigga.lms
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.content.res.Configuration
 
 import com.facebook.react.PackageList
@@ -42,6 +45,17 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val channelId = "default"
+      val name: CharSequence = "Default Channel"
+      val description = "Used for default notifications"
+      val importance = NotificationManager.IMPORTANCE_DEFAULT
+      val channel = NotificationChannel(channelId, name, importance).apply {
+        this.description = description
+      }
+  val notificationManager = getSystemService(NotificationManager::class.java)
+  notificationManager?.createNotificationChannel(channel)
+    }
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.

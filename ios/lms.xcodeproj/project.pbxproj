@@ -265,8 +265,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.company.lms;
-				PRODUCT_NAME = lms;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.exporeacthairynigga.lms";
+				PRODUCT_NAME = "lms";
 				SWIFT_OBJC_BRIDGING_HEADER = "lms/lms-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -294,8 +294,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.company.lms;
-				PRODUCT_NAME = lms;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.exporeacthairynigga.lms";
+				PRODUCT_NAME = "lms";
 				SWIFT_OBJC_BRIDGING_HEADER = "lms/lms-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

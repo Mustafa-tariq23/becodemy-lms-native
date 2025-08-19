@@ -13,10 +13,12 @@ export default function GradiantText({
   return (
     // @ts-ignore
     <MaskedView
+      className="bg-blue-500"
       maskElement={
-        <Text style={[styles, { backgroundColor: "transparent" }]}>{text}</Text>
+        <Text style={[styles]}>{text}</Text>
       }
     >
+      
       <LinearGradient
         colors={["#6D55FE", "#8976FC"]}
         start={{ x: 0, y: 0 }}
@@ -28,4 +30,3 @@ export default function GradiantText({
   );
 }
 
-const styles = StyleSheet.create({});

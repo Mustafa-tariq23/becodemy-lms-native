@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "142729750016",
+    "project_id": "saferoute-1",
+    "storage_bucket": "saferoute-1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142729750016:android:2fc6bb1fe2aba9140a5ae5",
+        "android_client_info": {
+          "package_name": "com.exporeacthairynigga.lms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsoFMLS_9Lvs1NI3VyTzU8P8ezrBLKxEo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

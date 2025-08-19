@@ -82,48 +82,51 @@ export const bannerData = [
 ];
 
 export const videoLessonsData = [
+  // Curated list of popular, stable tutorial videos (high likelihood of availability)
   {
-    url: "https://youtu.be/hGB-6VAcM6U",
-    thumbnail:
-      "https://res.cloudinary.com/dwp4syk3r/image/upload/v1717660359/WhatsApp_Image_2024-06-04_at_4.31.27_AM_afd4bw.jpg",
-    title:
-      "All Functional LMS mobile App with React Native,Expo,Typescript,Express js",
+    url: 'https://youtu.be/0-S5a0eXPoc',
+    thumbnail: 'https://i.ytimg.com/vi/0-S5a0eXPoc/hqdefault.jpg',
+    title: 'React Native Crash Course (Mosh)',
   },
   {
-    url: "https://youtu.be/BrrwtCt7d-Y",
-    thumbnail:
-      "https://res.cloudinary.com/dwp4syk3r/image/upload/v1713574008/WhatsApp_Image_2024-02-29_at_2.00.10_AM_zpk4qe.jpg",
-
-    title:
-      "SaaS Email Newsletter platform by using next14, typescript, AWS SES, AstraDb, Stripe",
+    url: 'https://youtu.be/wm5gMKuwSYk',
+    thumbnail: 'https://i.ytimg.com/vi/wm5gMKuwSYk/hqdefault.jpg',
+    title: 'Next.js Full Stack App (JavaScript Mastery)',
   },
   {
-    url: "https://youtu.be/mzbOqy5DWzE",
-    thumbnail:
-      "https://res.cloudinary.com/dwp4syk3r/image/upload/v1713574100/AI_Prompt_Selling_Marketplace_with_next_13.5_Full_Project_ezvziv.png",
-    title:
-      "SaaS Email Newsletter platform by using next14, typescript, AWS SES, AstraDb, Stripe",
+    url: 'https://youtu.be/BwuLxPH8IDs',
+    thumbnail: 'https://i.ytimg.com/vi/BwuLxPH8IDs/hqdefault.jpg',
+    title: 'TypeScript for Beginners (freeCodeCamp)',
   },
   {
-    url: "https://youtu.be/UxirFATvWTo",
-    thumbnail:
-      "https://res.cloudinary.com/dwp4syk3r/image/upload/v1713574204/Food_Delivery_Web_App_anntu1.png",
-    title:
-      "Food Delivery Web Application using Microservice Architecture with Nest.js,GraphQL,Next.js",
+    url: 'https://youtu.be/Ke90Tje7VS0',
+    thumbnail: 'https://i.ytimg.com/vi/Ke90Tje7VS0/hqdefault.jpg',
+    title: 'React JS Fundamentals (Facebook Dev)',
   },
   {
-    url: "https://youtu.be/h4dW5LNtcoE",
-    thumbnail:
-      "https://res.cloudinary.com/dwp4syk3r/image/upload/v1713574236/Let_s_Build_a_Full-stack_website_without_backend_ny0lcl.png",
-    title:
-      "Let's Make a Full-stack Website Without a Backend Next 14 | OneEntry CMS | Tailwind css | Typescript",
+    url: 'https://youtu.be/fBNz5xF-Kx4',
+    thumbnail: 'https://i.ytimg.com/vi/fBNz5xF-Kx4/hqdefault.jpg',
+    title: 'Node.js & Express Crash Course (Traversy)',
   },
   {
-    url: "https://youtu.be/4aS7g8OYHbg",
-    thumbnail:
-      "https://res.cloudinary.com/dkg6jv4l0/image/upload/v1723424082/WhatsApp_Image_2024-08-09_at_5.00.52_AM_wzokd1.jpg",
-    title:
-      "Let's build one real-time car booking full-stack mobile app by using Expo React Native",
+    url: 'https://youtu.be/Oe421EPjeBE',
+    thumbnail: 'https://i.ytimg.com/vi/Oe421EPjeBE/hqdefault.jpg',
+    title: 'Prisma ORM Crash Course (Traversy)',
+  },
+  {
+    url: 'https://youtu.be/w7ejDZ8SWv8',
+    thumbnail: 'https://i.ytimg.com/vi/w7ejDZ8SWv8/hqdefault.jpg',
+    title: 'React JS Crash Course (Traversy)',
+  },
+  {
+    url: 'https://youtu.be/dFgzHOX84xQ',
+    thumbnail: 'https://i.ytimg.com/vi/dFgzHOX84xQ/hqdefault.jpg',
+    title: 'Tailwind CSS Crash Course (Traversy)',
+  },
+  {
+    url: 'https://youtu.be/fqMOX6JJhGo',
+    thumbnail: 'https://i.ytimg.com/vi/fqMOX6JJhGo/hqdefault.jpg',
+    title: 'Docker Crash Course (Traversy)',
   },
 ];
 
@@ -265,3 +268,43 @@ export const staticTickets: TicketsTypes[] = [
       updatedAt: new Date("2024-08-07"),
     },
   ];
+
+  // Tech YouTube Playlists for CoursesData
+export const CoursesData = [
+  {
+    title: 'JavaScript Tutorials by Net Ninja',
+    url: 'https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU',
+    description: 'Modern JavaScript explained from the ground up.',
+    thumbnail: 'https://i.ytimg.com/vi/qoSksQ4s_hg/hqdefault.jpg'
+  },
+  {
+    title: 'Node.js Tutorial for Beginners (Codevolution)',
+    url: 'https://www.youtube.com/playlist?list=PLC3y8-rFHvwgg3vaYJgHGnModB54rxOk3',
+    description: 'Node.js from basics to advanced with real projects.',
+    thumbnail: 'https://i.ytimg.com/vi/Oe421EPjeBE/hqdefault.jpg'
+  },
+  {
+    title: 'TypeScript Tutorial for Beginners',
+    url: 'https://www.youtube.com/playlist?list=PL4cUxeGkcC9i0_2FF-WhtRIfIJ1lXlTZR',
+    description: 'TypeScript fundamentals and advanced concepts by Net Ninja.',
+    thumbnail: 'https://i.ytimg.com/vi/BwuLxPH8IDs/hqdefault.jpg'
+  },
+  {
+    title: 'Next.js Tutorials (JavaScript Mastery)',
+    url: 'https://www.youtube.com/playlist?list=PLillGF-RfqbZ2ybcoD2OaabW2P7Ws8CWu',
+    description: 'Build full stack apps with Next.js.',
+    thumbnail: 'https://i.ytimg.com/vi/wm5gMKuwSYk/hqdefault.jpg'
+  },
+  {
+    title: 'React Native - The Practical Guide',
+    url: 'https://www.youtube.com/playlist?list=PL55RiY5tL51q4D-B63KBnygU6opNPFk_q',
+    description: 'A comprehensive React Native playlist by Academind.',
+    thumbnail: 'https://i.ytimg.com/vi/0-S5a0eXPoc/hqdefault.jpg'
+  },
+  {
+    title: 'Docker for Beginners (TechWorld with Nana)',
+    url: 'https://www.youtube.com/playlist?list=PLy7NrYWoggjziYQIDorlXjTvvwweTYoNC',
+    description: 'Learn Docker from scratch with practical demos.',
+    thumbnail: 'https://i.ytimg.com/vi/3c-iBn73dDE/hqdefault.jpg'
+  }
+];
